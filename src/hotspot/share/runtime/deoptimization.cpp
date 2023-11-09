@@ -384,7 +384,7 @@ static bool rematerialize_objects(JavaThread* thread, int exec_mode, CompiledMet
 static void restore_eliminated_locks(JavaThread* thread, GrowableArray<compiledVFrame*>* chunk, bool realloc_failures,
                                      frame& deoptee, int exec_mode, bool& deoptimized_objects) {
   JavaThread* deoptee_thread = chunk->at(0)->thread();
-  assert(!EscapeBarrier::objs_are_deoptimized(deoptee_thread, deoptee.id()), "must relock just once");
+  assert(UseNewCode || !EscapeBarrier::objs_are_deoptimized(deoptee_thread, deoptee.id()), "must relock just once");
   assert(thread == Thread::current(), "should be");
   HandleMark hm(thread);
 #ifndef PRODUCT
@@ -532,7 +532,7 @@ Deoptimization::UnrollBlock* Deoptimization::fetch_unroll_info_helper(JavaThread
 
 #if COMPILER2_OR_JVMCI
   if ((jvmci_enabled COMPILER2_PRESENT( || ((DoEscapeAnalysis || EliminateNestedLocks) && EliminateLocks) ))
-      && !EscapeBarrier::objs_are_deoptimized(current, deoptee.id())) {
+      && (!EscapeBarrier::objs_are_deoptimized(current, deoptee.id()) || UseNewCode)) {
     bool unused;
     restore_eliminated_locks(current, chunk, realloc_failures, deoptee, exec_mode, unused);
   }
@@ -1614,6 +1614,9 @@ bool Deoptimization::relock_objects(JavaThread* thread, GrowableArray<MonitorInf
     if (mon_info->eliminated()) {
       assert(!mon_info->owner_is_scalar_replaced() || realloc_failures, "reallocation was missed");
       relocked_objects = true;
+      if (exec_mode == Unpack_none && UseNewCode) {
+        return true;
+      }
       if (!mon_info->owner_is_scalar_replaced()) {
         Handle obj(thread, mon_info->owner());
         markWord mark = obj->mark();
