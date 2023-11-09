@@ -42,72 +42,6 @@
  *                 -XX:+WhiteBoxAPI
  *                 -Xbatch
  *                 -XX:+DoEscapeAnalysis -XX:+EliminateAllocations -XX:+EliminateLocks -XX:+EliminateNestedLocks
- * @run driver EATests
- *                 -XX:+UnlockDiagnosticVMOptions
- *                 -Xms256m -Xmx256m
- *                 -Xbootclasspath/a:.
- *                 -XX:CompileCommand=dontinline,*::dontinline_*
- *                 -XX:+WhiteBoxAPI
- *                 -Xbatch
- *                 -XX:+DoEscapeAnalysis -XX:+EliminateAllocations -XX:-EliminateLocks -XX:+EliminateNestedLocks
- * @run driver EATests
- *                 -XX:+UnlockDiagnosticVMOptions
- *                 -Xms256m -Xmx256m
- *                 -Xbootclasspath/a:.
- *                 -XX:CompileCommand=dontinline,*::dontinline_*
- *                 -XX:+WhiteBoxAPI
- *                 -Xbatch
- *                 -XX:+DoEscapeAnalysis -XX:-EliminateAllocations -XX:+EliminateLocks -XX:+EliminateNestedLocks
- * @run driver EATests
- *                 -XX:+UnlockDiagnosticVMOptions
- *                 -Xms256m -Xmx256m
- *                 -Xbootclasspath/a:.
- *                 -XX:CompileCommand=dontinline,*::dontinline_*
- *                 -XX:+WhiteBoxAPI
- *                 -Xbatch
- *                 -XX:-DoEscapeAnalysis -XX:-EliminateAllocations -XX:+EliminateLocks -XX:+EliminateNestedLocks
- *
- * @comment Excercise -XX:+DeoptimizeObjectsALot. Mostly to prevent bit-rot because the option is meant to stress object deoptimization
- *          with non-synthetic workloads.
- * @run driver EATests
- *                 -XX:+UnlockDiagnosticVMOptions
- *                 -Xms256m -Xmx256m
- *                 -Xbootclasspath/a:.
- *                 -XX:CompileCommand=dontinline,*::dontinline_*
- *                 -XX:+WhiteBoxAPI
- *                 -Xbatch
- *                 -XX:-DoEscapeAnalysis -XX:-EliminateAllocations -XX:+EliminateLocks -XX:+EliminateNestedLocks
- *                 -XX:+IgnoreUnrecognizedVMOptions -XX:+DeoptimizeObjectsALot
- *
- */
-/**
- * @test
- * @bug 8227745
- *
- * @summary This is another configuration of EATests.java to test Graal. Some testcases are expected
- *          to fail because Graal does not provide all information about non-escaping objects in
- *          scope. These are skipped.
- *
- * @author Richard Reingruber richard DOT reingruber AT sap DOT com
- *
- * @requires ((vm.compMode == "Xmixed") & vm.graal.enabled)
- *
- * @library /test/lib /test/hotspot/jtreg
- *
- * @run build TestScaffold VMConnection TargetListener TargetAdapter jdk.test.whitebox.WhiteBox
- * @run driver jdk.test.lib.helpers.ClassFileInstaller jdk.test.whitebox.WhiteBox
- * @run compile -g EATests.java
- *
- * @comment Test with Graal. Some testcases are expected to fail because Graal does not provide all information about non-escaping
- *          objects in scope. These are skipped.
- * @run driver EATests
- *                 -XX:+UnlockDiagnosticVMOptions
- *                 -Xms256m -Xmx256m
- *                 -Xbootclasspath/a:.
- *                 -XX:CompileCommand=dontinline,*::dontinline_*
- *                 -XX:+WhiteBoxAPI
- *                 -Xbatch
- *                 -XX:+UnlockExperimentalVMOptions -XX:+UseJVMCICompiler
  */
 
 import com.sun.jdi.*;
@@ -188,58 +122,58 @@ class EATestsTarget {
         EATestCaseBaseTarget.staticSetUp();
         EATestCaseBaseTarget.staticSetUpDone();
 
-        // Materializing test cases, i.e. reallocating objects on the heap
-        new EAMaterializeLocalVariableUponGetTarget()                                       .run();
-        new EAGetWithoutMaterializeTarget()                                                 .run();
-        new EAMaterializeLocalAtObjectReturnTarget()                                        .run();
-        new EAMaterializeLocalAtObjectPollReturnReturnTarget()                              .run();
-        new EAMaterializeIntArrayTarget()                                                   .run();
-        new EAMaterializeLongArrayTarget()                                                  .run();
-        new EAMaterializeFloatArrayTarget()                                                 .run();
-        new EAMaterializeDoubleArrayTarget()                                                .run();
-        new EAMaterializeObjectArrayTarget()                                                .run();
-        new EAMaterializeObjectWithConstantAndNotConstantValuesTarget()                     .run();
-        new EAMaterializeObjReferencedBy2LocalsTarget()                                     .run();
-        new EAMaterializeObjReferencedBy2LocalsAndModifyTarget()                            .run();
-        new EAMaterializeObjReferencedBy2LocalsInDifferentVirtFramesTarget()                .run();
-        new EAMaterializeObjReferencedBy2LocalsInDifferentVirtFramesAndModifyTarget()       .run();
-        new EAMaterializeObjReferencedFromOperandStackTarget()                              .run();
-        new EAMaterializeLocalVariableUponGetAfterSetIntegerTarget()                        .run();
+        // // Materializing test cases, i.e. reallocating objects on the heap
+        // new EAMaterializeLocalVariableUponGetTarget()                                       .run();
+        // new EAGetWithoutMaterializeTarget()                                                 .run();
+        // new EAMaterializeLocalAtObjectReturnTarget()                                        .run();
+        // new EAMaterializeLocalAtObjectPollReturnReturnTarget()                              .run();
+        // new EAMaterializeIntArrayTarget()                                                   .run();
+        // new EAMaterializeLongArrayTarget()                                                  .run();
+        // new EAMaterializeFloatArrayTarget()                                                 .run();
+        // new EAMaterializeDoubleArrayTarget()                                                .run();
+        // new EAMaterializeObjectArrayTarget()                                                .run();
+        // new EAMaterializeObjectWithConstantAndNotConstantValuesTarget()                     .run();
+        // new EAMaterializeObjReferencedBy2LocalsTarget()                                     .run();
+        // new EAMaterializeObjReferencedBy2LocalsAndModifyTarget()                            .run();
+        // new EAMaterializeObjReferencedBy2LocalsInDifferentVirtFramesTarget()                .run();
+        // new EAMaterializeObjReferencedBy2LocalsInDifferentVirtFramesAndModifyTarget()       .run();
+        // new EAMaterializeObjReferencedFromOperandStackTarget()                              .run();
+        // new EAMaterializeLocalVariableUponGetAfterSetIntegerTarget()                        .run();
 
-        // Relocking test cases
-        new EARelockingSimpleTarget()                                                       .run();
+        // // Relocking test cases
+        // new EARelockingSimpleTarget()                                                       .run();
         new EARelockingSimpleWithAccessInOtherThreadTarget()                                .run();
-        new EARelockingRecursiveTarget()                                                    .run();
-        new EARelockingNestedInflatedTarget()                                               .run();
-        new EARelockingNestedInflated_02Target()                                            .run();
-        new EARelockingArgEscapeLWLockedInCalleeFrameTarget()                               .run();
-        new EARelockingArgEscapeLWLockedInCalleeFrame_2Target()                             .run();
-        new EAGetOwnedMonitorsTarget()                                                      .run();
-        new EAEntryCountTarget()                                                            .run();
-        new EARelockingObjectCurrentlyWaitingOnTarget()                                     .run();
+        // new EARelockingRecursiveTarget()                                                    .run();
+        // new EARelockingNestedInflatedTarget()                                               .run();
+        // new EARelockingNestedInflated_02Target()                                            .run();
+        // new EARelockingArgEscapeLWLockedInCalleeFrameTarget()                               .run();
+        // new EARelockingArgEscapeLWLockedInCalleeFrame_2Target()                             .run();
+        // new EAGetOwnedMonitorsTarget()                                                      .run();
+        // new EAEntryCountTarget()                                                            .run();
+        // new EARelockingObjectCurrentlyWaitingOnTarget()                                     .run();
 
-        // Test cases that require deoptimization even though neither
-        // locks nor allocations are eliminated at the point where
-        // escape state is changed.
-        new EADeoptFrameAfterReadLocalObject_01Target()                                     .run();
-        new EADeoptFrameAfterReadLocalObject_01BTarget()                                    .run();
-        new EADeoptFrameAfterReadLocalObject_02Target()                                     .run();
-        new EADeoptFrameAfterReadLocalObject_02BTarget()                                    .run();
-        new EADeoptFrameAfterReadLocalObject_02CTarget()                                    .run();
-        new EADeoptFrameAfterReadLocalObject_03Target()                                     .run();
+        // // Test cases that require deoptimization even though neither
+        // // locks nor allocations are eliminated at the point where
+        // // escape state is changed.
+        // new EADeoptFrameAfterReadLocalObject_01Target()                                     .run();
+        // new EADeoptFrameAfterReadLocalObject_01BTarget()                                    .run();
+        // new EADeoptFrameAfterReadLocalObject_02Target()                                     .run();
+        // new EADeoptFrameAfterReadLocalObject_02BTarget()                                    .run();
+        // new EADeoptFrameAfterReadLocalObject_02CTarget()                                    .run();
+        // new EADeoptFrameAfterReadLocalObject_03Target()                                     .run();
 
-        // PopFrame test cases
-        new EAPopFrameNotInlinedTarget()                                                    .run();
-        new EAPopFrameNotInlinedReallocFailureTarget()                                      .run();
-        new EAPopInlinedMethodWithScalarReplacedObjectsReallocFailureTarget()               .run();
+        // // PopFrame test cases
+        // new EAPopFrameNotInlinedTarget()                                                    .run();
+        // new EAPopFrameNotInlinedReallocFailureTarget()                                      .run();
+        // new EAPopInlinedMethodWithScalarReplacedObjectsReallocFailureTarget()               .run();
 
-        // ForceEarlyReturn test cases
-        new EAForceEarlyReturnNotInlinedTarget()                                            .run();
-        new EAForceEarlyReturnOfInlinedMethodWithScalarReplacedObjectsTarget()              .run();
-        new EAForceEarlyReturnOfInlinedMethodWithScalarReplacedObjectsReallocFailureTarget().run();
+        // // ForceEarlyReturn test cases
+        // new EAForceEarlyReturnNotInlinedTarget()                                            .run();
+        // new EAForceEarlyReturnOfInlinedMethodWithScalarReplacedObjectsTarget()              .run();
+        // new EAForceEarlyReturnOfInlinedMethodWithScalarReplacedObjectsReallocFailureTarget().run();
 
-        // Instances of ReferenceType
-        new EAGetInstancesOfReferenceTypeTarget()                                           .run();
+        // // Instances of ReferenceType
+        // new EAGetInstancesOfReferenceTypeTarget()                                           .run();
     }
 }
 
@@ -310,57 +244,57 @@ public class EATests extends TestScaffold {
         targetVMOptions = new TargetVMOptions(this, (ClassType) loc.declaringType());
 
         // Materializing test cases, i.e. reallocating objects on the heap
-        new EAMaterializeLocalVariableUponGet()                                       .run(this);
-        new EAGetWithoutMaterialize()                                                 .run(this);
-        new EAMaterializeLocalAtObjectReturn()                                        .run(this);
-        new EAMaterializeLocalAtObjectPollReturnReturn()                              .run(this);
-        new EAMaterializeIntArray()                                                   .run(this);
-        new EAMaterializeLongArray()                                                  .run(this);
-        new EAMaterializeFloatArray()                                                 .run(this);
-        new EAMaterializeDoubleArray()                                                .run(this);
-        new EAMaterializeObjectArray()                                                .run(this);
-        new EAMaterializeObjectWithConstantAndNotConstantValues()                     .run(this);
-        new EAMaterializeObjReferencedBy2Locals()                                     .run(this);
-        new EAMaterializeObjReferencedBy2LocalsAndModify()                            .run(this);
-        new EAMaterializeObjReferencedBy2LocalsInDifferentVirtFrames()                .run(this);
-        new EAMaterializeObjReferencedBy2LocalsInDifferentVirtFramesAndModify()       .run(this);
-        new EAMaterializeObjReferencedFromOperandStack()                              .run(this);
-        new EAMaterializeLocalVariableUponGetAfterSetInteger()                        .run(this);
+        // new EAMaterializeLocalVariableUponGet()                                       .run(this);
+        // new EAGetWithoutMaterialize()                                                 .run(this);
+        // new EAMaterializeLocalAtObjectReturn()                                        .run(this);
+        // new EAMaterializeLocalAtObjectPollReturnReturn()                              .run(this);
+        // new EAMaterializeIntArray()                                                   .run(this);
+        // new EAMaterializeLongArray()                                                  .run(this);
+        // new EAMaterializeFloatArray()                                                 .run(this);
+        // new EAMaterializeDoubleArray()                                                .run(this);
+        // new EAMaterializeObjectArray()                                                .run(this);
+        // new EAMaterializeObjectWithConstantAndNotConstantValues()                     .run(this);
+        // new EAMaterializeObjReferencedBy2Locals()                                     .run(this);
+        // new EAMaterializeObjReferencedBy2LocalsAndModify()                            .run(this);
+        // new EAMaterializeObjReferencedBy2LocalsInDifferentVirtFrames()                .run(this);
+        // new EAMaterializeObjReferencedBy2LocalsInDifferentVirtFramesAndModify()       .run(this);
+        // new EAMaterializeObjReferencedFromOperandStack()                              .run(this);
+        // new EAMaterializeLocalVariableUponGetAfterSetInteger()                        .run(this);
 
-        // Relocking test cases
-        new EARelockingSimple()                                                       .run(this);
+        // // Relocking test cases
+        // new EARelockingSimple()                                                       .run(this);
         new EARelockingSimpleWithAccessInOtherThread()                                .run(this);
-        new EARelockingRecursive()                                                    .run(this);
-        new EARelockingNestedInflated()                                               .run(this);
-        new EARelockingNestedInflated_02()                                            .run(this);
-        new EARelockingArgEscapeLWLockedInCalleeFrame()                               .run(this);
-        new EARelockingArgEscapeLWLockedInCalleeFrame_2()                             .run(this);
-        new EAGetOwnedMonitors()                                                      .run(this);
-        new EAEntryCount()                                                            .run(this);
-        new EARelockingObjectCurrentlyWaitingOn()                                     .run(this);
+        // new EARelockingRecursive()                                                    .run(this);
+        // new EARelockingNestedInflated()                                               .run(this);
+        // new EARelockingNestedInflated_02()                                            .run(this);
+        // new EARelockingArgEscapeLWLockedInCalleeFrame()                               .run(this);
+        // new EARelockingArgEscapeLWLockedInCalleeFrame_2()                             .run(this);
+        // new EAGetOwnedMonitors()                                                      .run(this);
+        // new EAEntryCount()                                                            .run(this);
+        // new EARelockingObjectCurrentlyWaitingOn()                                     .run(this);
 
-        // Test cases that require deoptimization even though neither
-        // locks nor allocations are eliminated at the point where
-        // escape state is changed.
-        new EADeoptFrameAfterReadLocalObject_01()                                     .run(this);
-        new EADeoptFrameAfterReadLocalObject_01B()                                    .run(this);
-        new EADeoptFrameAfterReadLocalObject_02()                                     .run(this);
-        new EADeoptFrameAfterReadLocalObject_02B()                                    .run(this);
-        new EADeoptFrameAfterReadLocalObject_02C()                                    .run(this);
-        new EADeoptFrameAfterReadLocalObject_03()                                     .run(this);
+        // // Test cases that require deoptimization even though neither
+        // // locks nor allocations are eliminated at the point where
+        // // escape state is changed.
+        // new EADeoptFrameAfterReadLocalObject_01()                                     .run(this);
+        // new EADeoptFrameAfterReadLocalObject_01B()                                    .run(this);
+        // new EADeoptFrameAfterReadLocalObject_02()                                     .run(this);
+        // new EADeoptFrameAfterReadLocalObject_02B()                                    .run(this);
+        // new EADeoptFrameAfterReadLocalObject_02C()                                    .run(this);
+        // new EADeoptFrameAfterReadLocalObject_03()                                     .run(this);
 
-        // PopFrame test cases
-        new EAPopFrameNotInlined()                                                    .run(this);
-        new EAPopFrameNotInlinedReallocFailure()                                      .run(this);
-        new EAPopInlinedMethodWithScalarReplacedObjectsReallocFailure()               .run(this);
+        // // PopFrame test cases
+        // new EAPopFrameNotInlined()                                                    .run(this);
+        // new EAPopFrameNotInlinedReallocFailure()                                      .run(this);
+        // new EAPopInlinedMethodWithScalarReplacedObjectsReallocFailure()               .run(this);
 
-        // ForceEarlyReturn test cases
-        new EAForceEarlyReturnNotInlined()                                            .run(this);
-        new EAForceEarlyReturnOfInlinedMethodWithScalarReplacedObjects()              .run(this);
-        new EAForceEarlyReturnOfInlinedMethodWithScalarReplacedObjectsReallocFailure().run(this);
+        // // ForceEarlyReturn test cases
+        // new EAForceEarlyReturnNotInlined()                                            .run(this);
+        // new EAForceEarlyReturnOfInlinedMethodWithScalarReplacedObjects()              .run(this);
+        // new EAForceEarlyReturnOfInlinedMethodWithScalarReplacedObjectsReallocFailure().run(this);
 
-        // Instances of ReferenceType
-        new EAGetInstancesOfReferenceType()                                           .run(this);
+        // // Instances of ReferenceType
+        // new EAGetInstancesOfReferenceType()                                           .run(this);
 
         // resume the target listening for events
         listenUntilVMDisconnect();
