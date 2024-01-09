@@ -29,4 +29,6 @@
 
 #include CPU_HEADER(nativeInst)
 
+NativePostCallNop* nativePostCallNop_at_stats(address address);
+
 #endif // SHARE_CODE_NATIVEINST_HPP

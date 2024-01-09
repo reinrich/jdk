@@ -858,6 +858,8 @@ jint Threads::create_vm(JavaVMInitArgs* args, bool* canTryAgain) {
 //   + Return to caller
 
 void Threads::destroy_vm() {
+  extern void PCN_print_stats();
+  PCN_print_stats();
   JavaThread* thread = JavaThread::current();
 
 #ifdef ASSERT

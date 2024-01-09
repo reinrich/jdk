@@ -35,7 +35,7 @@ inline CodeBlob* CodeCache::find_blob_fast(void* pc) {
 }
 
 inline CodeBlob* CodeCache::find_blob_and_oopmap(void* pc, int& slot) {
-  NativePostCallNop* nop = nativePostCallNop_at((address) pc);
+  NativePostCallNop* nop = nativePostCallNop_at_stats((address) pc);
   CodeBlob* cb;
   if (nop != nullptr && nop->displacement() != 0) {
     int offset = (nop->displacement() & 0xffffff);
@@ -51,7 +51,7 @@ inline CodeBlob* CodeCache::find_blob_and_oopmap(void* pc, int& slot) {
 }
 
 inline int CodeCache::find_oopmap_slot_fast(void* pc) {
-  NativePostCallNop* nop = nativePostCallNop_at((address) pc);
+  NativePostCallNop* nop = nativePostCallNop_at_stats((address) pc);
   return (nop != nullptr && nop->displacement() != 0)
       ? ((nop->displacement() >> 24) & 0xff)
       : -1;

@@ -1129,8 +1129,12 @@ void nmethod::fix_oop_relocations(address begin, address end, bool initialize_im
   }
 }
 
+extern int64_t PCN_patch_success;
+extern int64_t PCN_patch_cb_offset_failure;
+extern int64_t PCN_patch_oopmap_slot_failure;
+
 static void install_post_call_nop_displacement(nmethod* nm, address pc) {
-  NativePostCallNop* nop = nativePostCallNop_at((address) pc);
+  NativePostCallNop* nop = nativePostCallNop_at_stats((address) pc);
   intptr_t cbaddr = (intptr_t) nm;
   intptr_t offset = ((intptr_t) pc) - cbaddr;
 
@@ -1140,7 +1144,17 @@ static void install_post_call_nop_displacement(nmethod* nm, address pc) {
   } else if (((oopmap_slot & 0xff) == oopmap_slot) && ((offset & 0xffffff) == offset)) {
     jint value = (oopmap_slot << 24) | (jint) offset;
     nop->patch(value);
+    Atomic::inc(&PCN_patch_success, memory_order_relaxed);
   } else {
+    if (UseNewCode) {
+      if (((offset & 0xffffff) != offset)) {
+        Atomic::inc(&PCN_patch_cb_offset_failure, memory_order_relaxed);
+      }
+      if (((oopmap_slot & 0xff) != oopmap_slot)) {
+        Atomic::inc(&PCN_patch_oopmap_slot_failure, memory_order_relaxed);
+      }
+      nop->patch(0, 0);
+    }
     log_debug(codecache)("failed to encode %d %d", oopmap_slot, (int) offset);
   }
 }
@@ -1187,7 +1201,7 @@ void nmethod::make_deoptimized() {
       case relocInfo::opt_virtual_call_type: {
         CompiledIC *ic = CompiledIC_at(&iter);
         address pc = ic->end_of_call();
-        NativePostCallNop* nop = nativePostCallNop_at(pc);
+        NativePostCallNop* nop = nativePostCallNop_at_stats(pc);
         if (nop != nullptr) {
           nop->make_deopt();
         }
@@ -1197,7 +1211,7 @@ void nmethod::make_deoptimized() {
       case relocInfo::static_call_type: {
         CompiledStaticCall *csc = compiledStaticCall_at(iter.reloc());
         address pc = csc->end_of_call();
-        NativePostCallNop* nop = nativePostCallNop_at(pc);
+        NativePostCallNop* nop = nativePostCallNop_at_stats(pc);
         //tty->print_cr(" - static pc %p", pc);
         if (nop != nullptr) {
           nop->make_deopt();

@@ -354,7 +354,7 @@ void frame::deoptimize(JavaThread* thread) {
                         cm->deopt_mh_handler_begin() :
                         cm->deopt_handler_begin();
 
-  NativePostCallNop* inst = nativePostCallNop_at(pc());
+  NativePostCallNop* inst = nativePostCallNop_at_stats(pc());
 
   // Save the original pc before we patch in the new one
   cm->set_original_pc(this, pc());
