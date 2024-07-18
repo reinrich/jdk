@@ -599,7 +599,8 @@ private:
   DEBUG_ONLY(void verify_packs() const;)
 
   bool schedule_and_apply();
-  bool apply(Node_List& memops_schedule);
+  void apply(Node_List& memops_schedule);
+  bool apply2();
   void apply_memops_reordering_with_schedule(Node_List& memops_schedule);
   bool apply_vectorization();
   // Create a vector operand for the nodes in pack p for operand: in(opd_idx)

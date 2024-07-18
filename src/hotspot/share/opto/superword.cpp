@@ -483,7 +483,7 @@ bool SuperWord::SLP_extract() {
   DEBUG_ONLY(verify_packs();)
   DEBUG_ONLY(verify_no_extract());
 
-  return schedule_and_apply();
+  return schedule_and_apply() && apply2();
 }
 
 // Find the "seed" memops pairs. These are pairs that we strongly suspect would lead to vectorization.
@@ -2127,16 +2127,23 @@ bool SuperWord::schedule_and_apply() {
   }
 
   // (4) Apply the vectorization, including re-ordering the memops.
-  return apply(memops_schedule);
+  apply(memops_schedule);
+
+  return true;
 }
 
-bool SuperWord::apply(Node_List& memops_schedule) {
+void SuperWord::apply(Node_List& memops_schedule) {
   Compile* C = phase()->C;
   CountedLoopNode* cl = lpt()->_head->as_CountedLoop();
   C->print_method(PHASE_AUTO_VECTORIZATION1_BEFORE_APPLY, 4, cl);
 
   apply_memops_reordering_with_schedule(memops_schedule);
   C->print_method(PHASE_AUTO_VECTORIZATION2_AFTER_REORDER, 4, cl);
+}
+
+bool SuperWord::apply2() {
+  Compile* C = phase()->C;
+  CountedLoopNode* cl = lpt()->_head->as_CountedLoop();
 
   adjust_pre_loop_limit_to_align_main_loop_vectors();
   C->print_method(PHASE_AUTO_VECTORIZATION3_AFTER_ADJUST_LIMIT, 4, cl);
