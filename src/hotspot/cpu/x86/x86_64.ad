@@ -855,6 +855,25 @@ void MachPrologNode::emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const {
   __ verified_entry(framesize, C->output()->need_stack_bang(bangsize)?bangsize:0, false, C->stub_function() != nullptr);
 
   C->output()->set_frame_complete(__ offset());
+  if (UseNewCode) {
+  __ mov64(rax, 1l<<32 |  1); __ movdq(xmm0, rax);
+  __ mov64(rax, 1l<<32 |  2); __ movdq(xmm1, rax);
+  __ mov64(rax, 1l<<32 |  3); __ movdq(xmm2, rax);
+  __ mov64(rax, 1l<<32 |  4); __ movdq(xmm3, rax);
+  __ mov64(rax, 1l<<32 |  5); __ movdq(xmm4, rax);
+  __ mov64(rax, 1l<<32 |  6); __ movdq(xmm5, rax);
+  __ mov64(rax, 1l<<32 |  7); __ movdq(xmm6, rax);
+  __ mov64(rax, 1l<<32 |  8); __ movdq(xmm7, rax);
+  __ mov64(rax, 1l<<32 |  9); __ movdq(xmm8, rax);
+  __ mov64(rax, 1l<<32 | 10); __ movdq(xmm9, rax);
+  __ mov64(rax, 1l<<32 | 11); __ movdq(xmm10, rax);
+  __ mov64(rax, 1l<<32 | 12); __ movdq(xmm11, rax);
+  __ mov64(rax, 1l<<32 | 13); __ movdq(xmm12, rax);
+  __ mov64(rax, 1l<<32 | 14); __ movdq(xmm13, rax);
+  __ mov64(rax, 1l<<32 | 15); __ movdq(xmm14, rax);
+  __ mov64(rax, 1l<<32 | 16); __ movdq(xmm15, rax);
+  __ should_not_reach_here();
+  }
 
   if (C->has_mach_constant_base_node()) {
     // NOTE: We set the table base offset here because users might be
