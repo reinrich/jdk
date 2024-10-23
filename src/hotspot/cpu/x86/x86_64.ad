@@ -872,7 +872,8 @@ void MachPrologNode::emit(C2_MacroAssembler *masm, PhaseRegAlloc *ra_) const {
   __ mov64(rax, 1l<<32 | 14); __ movdq(xmm13, rax);
   __ mov64(rax, 1l<<32 | 15); __ movdq(xmm14, rax);
   __ mov64(rax, 1l<<32 | 16); __ movdq(xmm15, rax);
-  __ should_not_reach_here();
+  __ mov64(rax, 0);
+  __ movq(rax, Address(rax));
   }
 
   if (C->has_mach_constant_base_node()) {
