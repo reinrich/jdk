@@ -49,8 +49,8 @@ class ResourceArea: public Arena {
 #endif // ASSERT
 
 public:
-  ResourceArea(MemTag mem_tag = mtThread) :
-    Arena(mem_tag, Arena::Tag::tag_ra) DEBUG_ONLY(COMMA _nesting(0)) {}
+  ResourceArea(MemTag mem_tag = mtThread, bool recycle_chunks = true) :
+    Arena(mem_tag, Arena::Tag::tag_ra, Chunk::init_size, recycle_chunks) DEBUG_ONLY(COMMA _nesting(0)) {}
 
   ResourceArea(size_t init_size, MemTag mem_tag = mtThread, Arena::Tag arena_tag = Arena::Tag::tag_ra) :
     Arena(mem_tag, arena_tag, init_size) DEBUG_ONLY(COMMA _nesting(0)) {
@@ -81,7 +81,11 @@ public:
       _max(area->_max),
       _size_in_bytes(area->size_in_bytes())
       DEBUG_ONLY(COMMA _nesting(area->_nesting))
-    {}
+    {
+      if (!area->dd_use_chunk_pool()) {
+        area->_hwm = area->_max;  // allocate in new chunk so we can unmap when rolling back
+      }
+    }
   };
 
   // Check and adjust debug-only nesting level.

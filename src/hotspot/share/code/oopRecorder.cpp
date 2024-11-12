@@ -218,7 +218,11 @@ template class ValueRecorder<address>;
 
 ExternalsRecorder* ExternalsRecorder::_recorder = nullptr;
 
-ExternalsRecorder::ExternalsRecorder(): _arena(mtCode), _externals(&_arena) {}
+ExternalsRecorder::ExternalsRecorder(): _arena(mtCode, Arena::Tag::tag_other, Chunk::init_size, /* recycle_chunks */ false), _externals(&_arena) {
+  DDD_D(P, &_arena);
+  DDD_D(I, _arena.dd_use_chunk_pool());
+  DDD_D(P, Thread::current_or_null());
+}
 
 #ifndef PRODUCT
 static int total_access_count = 0;
