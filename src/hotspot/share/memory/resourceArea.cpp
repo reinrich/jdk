@@ -22,6 +22,7 @@
  *
  */
 
+#include "logging/logStream.hpp"
 #include "memory/allocation.inline.hpp"
 #include "memory/resourceArea.inline.hpp"
 #include "nmt/memTracker.hpp"
@@ -54,6 +55,19 @@ void ResourceArea::verify_has_resource_mark() {
         fatal("memory leak: allocating without ResourceMark");
       }
     }
+  }
+}
+ResourceMarkLogger::~ResourceMarkLogger() {
+  LogTarget(Debug, newcode) _lt;
+  if (_lt.develop_is_enabled()) {
+    LogStream _ls(_lt);
+    ResourceArea::SavedState ss = _rm._impl._saved_state;
+    ResourceArea* ra = _rm._impl._area;
+    size_t free_on_entry_b = pointer_delta(ss._max, ss._hwm, 1);
+    size_t used_on_entry_b = ss._size_in_bytes - free_on_entry_b;
+    size_t free_now_b = pointer_delta(ra->_max, ra->_hwm, 1);
+    size_t alloc_b = (ra->size_in_bytes() - free_now_b - used_on_entry_b);
+    _ls.print_cr("%s: used_kb:" SIZE_FORMAT " alloc_kb:" SIZE_FORMAT" alloc_b:" SIZE_FORMAT, _id, used_on_entry_b/K, alloc_b/K, alloc_b);
   }
 }
 
