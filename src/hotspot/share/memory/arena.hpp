@@ -48,12 +48,13 @@ class Chunk {
   uint64_t _stamp;
 
 public:
+  bool         dd_is_mmapped;
   NONCOPYABLE(Chunk);
 
   void operator delete(void*) = delete;
   void* operator new(size_t) = delete;
 
-  Chunk(size_t length);
+  Chunk(size_t length, bool mmapped);
 
   enum {
     // default sizes; make them slightly smaller than 2**k to guard against
@@ -150,9 +151,18 @@ protected:
   }
 
  public:
+
+  bool _dd_use_chunk_pool;
+  static constexpr bool dd_never_use_chunk_pool = false;
+
+  bool dd_use_chunk_pool() {
+    if (UseNewCode && dd_never_use_chunk_pool) return false;
+    return _dd_use_chunk_pool;
+  }
+
   // Start the chunk_pool cleaner task
   static void start_chunk_pool_cleaner_task();
-  Arena(MemTag mem_tag, Tag tag = Tag::tag_other, size_t init_size = Chunk::init_size);
+  Arena(MemTag mem_tag, Tag tag = Tag::tag_other, size_t init_size = Chunk::init_size, bool recycle_chunks = true);
   ~Arena();
   void  destruct_contents();
   char* hwm() const             { return _hwm; }

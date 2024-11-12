@@ -24,6 +24,7 @@
  */
 
 #include "compiler/compilationMemoryStatistic.hpp"
+#include "logging/log.hpp"
 #include "memory/allocation.hpp"
 #include "memory/allocation.inline.hpp"
 #include "memory/arena.hpp"
@@ -169,7 +170,7 @@ Chunk* ChunkPool::allocate_chunk(Arena* arena, size_t length, AllocFailType allo
     }
     chunk = (Chunk*)p;
   }
-  ::new(chunk) Chunk(length);
+  ::new(chunk) Chunk(length, false);
   // We rely on arena alignment <= malloc alignment.
   assert(is_aligned(chunk, ARENA_AMALLOC_ALIGNMENT), "Chunk start address misaligned.");
 
@@ -184,7 +185,80 @@ Chunk* ChunkPool::allocate_chunk(Arena* arena, size_t length, AllocFailType allo
   return chunk;
 }
 
+#include <sys/mman.h>
+
+#define MAP_FIXED_NOREPLACE_value 0x100000
+#ifndef MAP_FIXED_NOREPLACE
+  #define MAP_FIXED_NOREPLACE MAP_FIXED_NOREPLACE_value
+#else
+  // Sanity-check our assumed default value if we build with a new enough libc.
+  STATIC_ASSERT(MAP_FIXED_NOREPLACE == MAP_FIXED_NOREPLACE_value);
+#endif
+
+// Produce monotonically increasing addresses.
+char* dd_first_chunk_addr = (char*)(8*G);
+char* dd_next_chunk_addr = dd_first_chunk_addr;
+char* dd_get_next_chunk_addr(size_t bytes) {
+  ThreadCritical tc;
+  char* res = dd_next_chunk_addr;
+  if (res > (res + bytes)) {
+    // Overflow
+    res = dd_first_chunk_addr;
+  }
+  dd_next_chunk_addr = res + bytes;
+  return res;
+}
+
+static Chunk* mmap_fresh_chunk(size_t length) {
+  assert(UseNewCode, "");
+  assert(is_aligned(length, ARENA_AMALLOC_ALIGNMENT), "chunk payload length misaligned: "
+         SIZE_FORMAT ".", length);
+
+  size_t bytes = align_up(ARENA_ALIGN(sizeof(Chunk)) + length, os::vm_page_size());
+
+  Chunk* chunk;
+  int retries = 10;
+  size_t retry_backoff = 8*G;
+  do {
+    char* dest_addr = dd_get_next_chunk_addr(bytes);
+    const int flags = MAP_PRIVATE | MAP_NORESERVE | MAP_ANONYMOUS |
+        ((dest_addr != nullptr) ? MAP_FIXED_NOREPLACE : 0);
+    chunk = (Chunk*)::mmap(dest_addr, bytes, PROT_READ | PROT_WRITE, flags, -1, 0);
+
+    log_develop_trace(newcode)("mmapped chunk:" PTR_FORMAT " length:" SIZE_FORMAT " bytes:" SIZE_FORMAT,
+        p2i(chunk), length, bytes);
+
+    if (chunk == MAP_FAILED) {
+      ThreadCritical tc;
+      dd_next_chunk_addr += retry_backoff;
+      guarantee(retries-- > 0, "mmap failed: dest_addr:" PTR_FORMAT " length:" SIZE_FORMAT " bytes:" SIZE_FORMAT,
+                p2i(dest_addr), length, bytes);
+    }
+  } while (chunk == MAP_FAILED);
+
+  assert(chunk != nullptr && chunk != MAP_FAILED, "mmap failed: ");
+  ::new(chunk) Chunk(length, true);
+  return chunk;
+}
+
+static int unmap_chunk(Chunk* c) {
+  assert(UseNewCode, "");
+  assert(c->dd_is_mmapped, "");
+  size_t bytes = align_up(ARENA_ALIGN(sizeof(Chunk)) + c->length(), os::vm_page_size());
+  log_develop_trace(newcode)("unmmapped chunk:" PTR_FORMAT " length:" SIZE_FORMAT " bytes:" SIZE_FORMAT,
+                    p2i(c), c->length(), bytes);
+  if (::munmap((char*)c, bytes) != 0) {
+    ShouldNotReachHere();
+  }
+  return 1;
+}
+
 void ChunkPool::deallocate_chunk(Chunk* c) {
+
+  if (c->dd_is_mmapped) {
+    unmap_chunk(c);
+    return;
+  }
 
   // Inform compilation memstat
   if (CompilationMemoryStatistic::enabled() && c->stamp() != 0) {
@@ -225,15 +299,15 @@ void Arena::start_chunk_pool_cleaner_task() {
   cleaner->enroll();
 }
 
-Chunk::Chunk(size_t length) :
-    _next(nullptr), _len(length), _stamp(0) {
+Chunk::Chunk(size_t length, bool mmapped) :
+    _next(nullptr), _len(length), _stamp(0), dd_is_mmapped(mmapped) {
 }
 
 void Chunk::chop(Chunk* k) {
   while (k != nullptr) {
     Chunk* tmp = k->next();
     // clear out this chunk (to detect allocation bugs)
-    if (ZapResourceArea) memset(k->bottom(), badResourceValue, k->length());
+    if (ZapResourceArea && !k->dd_is_mmapped) memset(k->bottom(), badResourceValue, k->length());
     ChunkPool::deallocate_chunk(k);
     k = tmp;
   }
@@ -245,14 +319,25 @@ void Chunk::next_chop(Chunk* k) {
   k->_next = nullptr;
 }
 
-Arena::Arena(MemTag mem_tag, Tag tag, size_t init_size) :
+Arena::Arena(MemTag mem_tag, Tag tag, size_t init_size, bool recycle_chunks) :
   _mem_tag(mem_tag), _tag(tag),
   _size_in_bytes(0),
   _first(nullptr), _chunk(nullptr),
-  _hwm(nullptr), _max(nullptr)
+  _hwm(nullptr), _max(nullptr),
+  _dd_use_chunk_pool(!UseNewCode ||
+      (tag == Tag::tag_ha) ||
+      (recycle_chunks && (Thread::current_or_null() == nullptr || !Thread::current_or_null()->is_Compiler_thread())))
 {
   init_size = ARENA_ALIGN(init_size);
-  _chunk = ChunkPool::allocate_chunk(this, init_size, AllocFailStrategy::EXIT_OOM);
+  if (dd_use_chunk_pool()) {
+    assert(!UseNewCode ||
+        _tag == Tag::tag_ha ||
+        Thread::current_or_null() == nullptr || !Thread::current()->is_Compiler_thread(), "arena:" PTR_FORMAT, p2i(this));
+    _chunk = ChunkPool::allocate_chunk(this, init_size, AllocFailStrategy::EXIT_OOM);
+  } else {
+    _chunk = mmap_fresh_chunk(init_size);
+  }
+
   _first = _chunk;
   _hwm = _chunk->bottom();      // Save the cached hwm, max
   _max = _chunk->top();
@@ -308,7 +393,14 @@ void* Arena::grow(size_t x, AllocFailType alloc_failmode) {
   }
 
   Chunk* k = _chunk;            // Get filled-up chunk address
-  _chunk = ChunkPool::allocate_chunk(this, len, alloc_failmode);
+  if (dd_use_chunk_pool()) {
+    assert(!UseNewCode ||
+        _tag == Tag::tag_ha ||
+        Thread::current_or_null() == nullptr || !Thread::current()->is_Compiler_thread(), "arena:" PTR_FORMAT, p2i(this));
+    _chunk = ChunkPool::allocate_chunk(this, len, alloc_failmode);
+  } else {
+    _chunk = mmap_fresh_chunk(len);
+  }
 
   if (_chunk == nullptr) {
     _chunk = k;                 // restore the previous value of _chunk
