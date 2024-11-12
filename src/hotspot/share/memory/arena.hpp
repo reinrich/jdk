@@ -92,6 +92,7 @@ public:
 
 // Fast allocation of memory
 class Arena : public CHeapObjBase {
+    friend class ResourceMarkLogger;
 public:
   enum class Tag: uint8_t {
 #define ARENA_TAG_ENUM(name, str, desc) tag_##name,
