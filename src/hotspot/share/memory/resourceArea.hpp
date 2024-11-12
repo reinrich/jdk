@@ -68,6 +68,7 @@ public:
   // rollback to that mark.
   class SavedState {
     friend class ResourceArea;
+    friend class ResourceMarkLogger;
     Chunk* _chunk;
     char* _hwm;
     char* _max;
@@ -156,6 +157,7 @@ public:
 
 // Shared part of implementation for ResourceMark and DeoptResourceMark.
 class ResourceMarkImpl {
+    friend class ResourceMarkLogger;
   ResourceArea* _area;          // Resource area to stack allocate
   ResourceArea::SavedState _saved_state;
 
@@ -183,6 +185,7 @@ public:
 };
 
 class ResourceMark: public StackObj {
+    friend class ResourceMarkLogger;
   const ResourceMarkImpl _impl;
 #ifdef ASSERT
   Thread* _thread;
@@ -217,6 +220,14 @@ public:
 #endif // ASSERT
 
   void reset_to_mark() { _impl.reset_to_mark(); }
+};
+
+class ResourceMarkLogger {
+    ResourceMark& _rm;
+    const char* _id;
+  public:
+    ResourceMarkLogger(ResourceMark& rm, const char* id) : _rm(rm), _id(id) {}
+    ~ResourceMarkLogger();
 };
 
 //------------------------------DeoptResourceMark-----------------------------------
