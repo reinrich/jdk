@@ -1358,4 +1358,107 @@ std::add_rvalue_reference_t<T> declval() noexcept;
 // handled.
 bool IEEE_subnormal_handling_OK();
 
+#define DDD_FMT_I INT64_FORMAT
+#define DDD_FMT_P PTR_FORMAT
+#define DDD_CST_I(v) uint64_t(v)
+#define DDD_CST_P(v) p2i(v)
+
+#define DDD_T_1(f1, v1)                                 \
+  log_develop_trace(newcode)("DDD %s:%d "               \
+                             #v1 ":" DDD_FMT_##f1,      \
+                             __func__,                  \
+                             __LINE__,                  \
+                             DDD_CST_##f1(v1))
+#define DDD_T_2(f1, v1, f2, v2)                         \
+  log_develop_trace(newcode)("DDD %s:%d "               \
+                             #v1 ":" DDD_FMT_##f1 " "   \
+                             #v2 ":" DDD_FMT_##f2,      \
+                             __func__,                  \
+                             __LINE__,                  \
+                             DDD_CST_##f1(v1),          \
+                             DDD_CST_##f2(v2))
+
+#define DDD_T_3(f1, v1, f2, v2, f3, v3)                 \
+  log_develop_trace(newcode)("DDD %s:%d "               \
+                             #v1 ":" DDD_FMT_##f1 " "   \
+                             #v2 ":" DDD_FMT_##f2 " "   \
+                             #v3 ":" DDD_FMT_##f3,      \
+                             __func__,                  \
+                             __LINE__,                  \
+                             DDD_CST_##f1(v1),          \
+                             DDD_CST_##f2(v2),          \
+                             DDD_CST_##f3(v3))
+
+#define DDD_T_4(f1, v1, f2, v2, f3, v3, f4, v4)         \
+  log_develop_trace(newcode)("DDD %s:%d "               \
+                             #v1 ":" DDD_FMT_##f1 " "   \
+                             #v2 ":" DDD_FMT_##f2 " "   \
+                             #v3 ":" DDD_FMT_##f3 " "   \
+                             #v4 ":" DDD_FMT_##f4,      \
+                             __func__,                  \
+                             __LINE__,                  \
+                             DDD_CST_##f1(v1),          \
+                             DDD_CST_##f2(v2),          \
+                             DDD_CST_##f3(v3),          \
+                             DDD_CST_##f4(v4))
+
+#define DDD_T_NUM_ARGS(...) DDD_T_NUM_ARGS_IMPL(__VA_ARGS__, 5, 4, 3, 2, 1, 0)
+#define DDD_T_NUM_ARGS_IMPL(_1, _2, _3, _4, _5, N, ...) N
+
+#define DDD_T_NUM_ARG_PAIRS(...) DDD_T_NUM_ARG_PAIRS_IMPL(__VA_ARGS__, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1, 0, 0)
+#define DDD_T_NUM_ARG_PAIRS_IMPL(_1, _1b, _2, _2b, _3, _3b, _4, _4b, _5, _5b, _6, _6b, N, ...) N
+
+#define DDD_T_PASTE(a, b) a##b
+#define DDD_T_MACRO_CONCAT(a, b) DDD_T_PASTE(a, b)
+#define DDD_T(...) DDD_T_MACRO_CONCAT(DDD_T_, DDD_T_NUM_ARG_PAIRS(__VA_ARGS__))(__VA_ARGS__)
+
+#define DDD_D_1(f1, v1)                                 \
+  log_develop_debug(newcode)("DDD %s:%d "               \
+                             #v1 ":" DDD_FMT_##f1,      \
+                             __func__,                  \
+                             __LINE__,                  \
+                             DDD_CST_##f1(v1))
+#define DDD_D_2(f1, v1, f2, v2)                         \
+  log_develop_debug(newcode)("DDD %s:%d "               \
+                             #v1 ":" DDD_FMT_##f1 " "   \
+                             #v2 ":" DDD_FMT_##f2,      \
+                             __func__,                  \
+                             __LINE__,                  \
+                             DDD_CST_##f1(v1),          \
+                             DDD_CST_##f2(v2))
+
+#define DDD_D_3(f1, v1, f2, v2, f3, v3)                 \
+  log_develop_debug(newcode)("DDD %s:%d "               \
+                             #v1 ":" DDD_FMT_##f1 " "   \
+                             #v2 ":" DDD_FMT_##f2 " "   \
+                             #v3 ":" DDD_FMT_##f3,      \
+                             __func__,                  \
+                             __LINE__,                  \
+                             DDD_CST_##f1(v1),          \
+                             DDD_CST_##f2(v2),          \
+                             DDD_CST_##f3(v3))
+
+#define DDD_D_4(f1, v1, f2, v2, f3, v3, f4, v4)         \
+  log_develop_debug(newcode)("DDD %s:%d "               \
+                             #v1 ":" DDD_FMT_##f1 " "   \
+                             #v2 ":" DDD_FMT_##f2 " "   \
+                             #v3 ":" DDD_FMT_##f3 " "   \
+                             #v4 ":" DDD_FMT_##f4,      \
+                             __func__,                  \
+                             __LINE__,                  \
+                             DDD_CST_##f1(v1),          \
+                             DDD_CST_##f2(v2),          \
+                             DDD_CST_##f3(v3),          \
+                             DDD_CST_##f4(v4))
+
+#define DDD_D_NUM_ARGS(...) DDD_D_NUM_ARGS_IMPL(__VA_ARGS__, 5, 4, 3, 2, 1, 0)
+#define DDD_D_NUM_ARGS_IMPL(_1, _2, _3, _4, _5, N, ...) N
+
+#define DDD_D_NUM_ARG_PAIRS(...) DDD_D_NUM_ARG_PAIRS_IMPL(__VA_ARGS__, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2, 1, 1, 0, 0)
+#define DDD_D_NUM_ARG_PAIRS_IMPL(_1, _1b, _2, _2b, _3, _3b, _4, _4b, _5, _5b, _6, _6b, N, ...) N
+
+#define DDD_D_PASTE(a, b) a##b
+#define DDD_D_MACRO_CONCAT(a, b) DDD_D_PASTE(a, b)
+#define DDD_D(...) DDD_D_MACRO_CONCAT(DDD_D_, DDD_D_NUM_ARG_PAIRS(__VA_ARGS__))(__VA_ARGS__)
+
 #endif // SHARE_UTILITIES_GLOBALDEFINITIONS_HPP
