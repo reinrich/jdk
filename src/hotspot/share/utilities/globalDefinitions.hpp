@@ -1407,6 +1407,9 @@ bool IEEE_subnormal_handling_OK();
 
 #endif // HOTSPOT_GTEST
 
+/////////////////////////////////// DEBUGGING TOOLS ///////////////////////////////////
+
+void ddd_print_native_stack(uint64_t data1, uint64_t data2);
 
 #define DDD_FMT_I INT64_FORMAT
 #define DDD_FMT_P PTR_FORMAT
