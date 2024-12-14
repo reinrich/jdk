@@ -1358,6 +1358,10 @@ std::add_rvalue_reference_t<T> declval() noexcept;
 // handled.
 bool IEEE_subnormal_handling_OK();
 
+/////////////////////////////////// DEBUGGING TOOLS ///////////////////////////////////
+
+void ddd_print_native_stack(uint64_t data1, uint64_t data2);
+
 #define DDD_FMT_I INT64_FORMAT
 #define DDD_FMT_P PTR_FORMAT
 #define DDD_CST_I(v) uint64_t(v)
