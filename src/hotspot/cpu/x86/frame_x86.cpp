@@ -373,7 +373,7 @@ frame frame::sender_for_entry_frame(RegisterMap* map) const {
   assert(jfa->last_Java_sp() > sp(), "must be above this frame on stack");
   // Since we are walking the stack now this nested anchor is obviously walkable
   // even if it wasn't when it was stacked.
-  jfa->make_walkable();
+  jfa->make_walkable(DEBUG_ONLY(map->is_async()));
   map->clear();
   assert(map->include_argument_oops(), "should be set by clear");
   frame fr(jfa->last_Java_sp(), jfa->last_Java_fp(), jfa->last_Java_pc());
@@ -405,7 +405,7 @@ frame frame::sender_for_upcall_stub_frame(RegisterMap* map) const {
   assert(jfa->last_Java_sp() > sp(), "must be above this frame on stack");
   // Since we are walking the stack now this nested anchor is obviously walkable
   // even if it wasn't when it was stacked.
-  jfa->make_walkable();
+  jfa->make_walkable(DEBUG_ONLY(map->is_async()));
   map->clear();
   assert(map->include_argument_oops(), "should be set by clear");
   frame fr(jfa->last_Java_sp(), jfa->last_Java_fp(), jfa->last_Java_pc());
@@ -696,12 +696,14 @@ frame::frame(void* sp, void* fp, void* pc) {
 
 #endif
 
-void JavaFrameAnchor::make_walkable() {
+void JavaFrameAnchor::make_walkable(DEBUG_ONLY(bool async)) {
   // last frame set?
   if (last_Java_sp() == nullptr) return;
+  DEBUG_ONLY(int amw_cnt = _async_made_walkable_cnt);
   // already walkable?
   if (walkable()) return;
-  vmassert(last_Java_pc() == nullptr, "already walkable");
+  vmassert(last_Java_pc() == nullptr || (amw_cnt < _async_made_walkable_cnt), "already walkable");
+  DEBUG_ONLY(if (async) _async_made_walkable_cnt++);
   _last_Java_pc = (address)_last_Java_sp[-1];
   vmassert(walkable(), "something went wrong");
 }

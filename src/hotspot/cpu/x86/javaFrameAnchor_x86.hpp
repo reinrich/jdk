@@ -30,6 +30,8 @@ private:
   // FP value associated with _last_Java_sp:
   intptr_t* volatile        _last_Java_fp;           // pointer is volatile not what it points to
 
+  DEBUG_ONLY(volatile int _async_made_walkable_cnt;) // reset in copy() below to avoid overflow
+
 public:
   // Each arch must define reset, save, restore
   // These are used by objects that only care about:
@@ -43,6 +45,7 @@ public:
     // fence?
     _last_Java_fp = nullptr;
     _last_Java_pc = nullptr;
+    DEBUG_ONLY(_async_made_walkable_cnt = 0);
   }
 
   void copy(JavaFrameAnchor* src) {
@@ -58,12 +61,13 @@ public:
 
     _last_Java_fp = src->_last_Java_fp;
     _last_Java_pc = src->_last_Java_pc;
+    DEBUG_ONLY(_async_made_walkable_cnt = 0);
     // Must be last so profiler will always see valid frame if has_last_frame() is true
     _last_Java_sp = src->_last_Java_sp;
   }
 
   bool walkable(void)                            { return _last_Java_sp != nullptr && _last_Java_pc != nullptr; }
-  void make_walkable();
+  void make_walkable(DEBUG_ONLY(bool async = false));
 
   intptr_t* last_Java_sp(void) const             { return _last_Java_sp; }
 
