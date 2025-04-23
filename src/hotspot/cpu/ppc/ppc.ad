@@ -5680,6 +5680,7 @@ instruct loadV16_Power8(vecX dst, indirect mem) %{
   format %{ "LXVD2X      $dst, $mem \t// load 16-byte Vector" %}
   size(4);
   ins_encode %{
+    assert(!UseNewCode || (($dst$$VectorSRegister)->encoding() & 3) == 0, "vecexperiment Reg:%d", ($dst$$VectorSRegister)->encoding());
     __ lxvd2x($dst$$VectorSRegister, $mem$$Register);
   %}
   ins_pipe(pipe_class_default);
@@ -5693,6 +5694,7 @@ instruct loadV16_Power9(vecX dst, memoryAlg16 mem) %{
   format %{ "LXV      $dst, $mem \t// load 16-byte Vector" %}
   size(4);
   ins_encode %{
+    assert(!UseNewCode || (($dst$$VectorSRegister)->encoding() & 3) == 0, "vecexperiment Reg:%d", ($dst$$VectorSRegister)->encoding());
     __ lxv($dst$$VectorSRegister, $mem$$disp, $mem$$Register);
   %}
   ins_pipe(pipe_class_default);
