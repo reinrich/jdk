@@ -5400,6 +5400,7 @@ instruct loadV16(vecX dst, indirect mem) %{
   format %{ "LXVD2X      $dst, $mem \t// load 16-byte Vector" %}
   size(4);
   ins_encode %{
+    assert((($dst$$VectorSRegister)->encoding() & 3) == 0, "vecexperiment Reg:%d", ($dst$$VectorSRegister)->encoding());
     __ lxvd2x($dst$$VectorSRegister, $mem$$Register);
   %}
   ins_pipe(pipe_class_default);
