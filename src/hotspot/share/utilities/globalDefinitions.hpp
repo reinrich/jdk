@@ -1469,4 +1469,7 @@ bool IEEE_subnormal_handling_OK();
 #define DDD_D_MACRO_CONCAT(a, b) DDD_D_PASTE(a, b)
 #define DDD_D(...) DDD_D_MACRO_CONCAT(DDD_D_, DDD_D_NUM_ARG_PAIRS(__VA_ARGS__))(__VA_ARGS__)
 
+class outputStream;
+void DDD_print_binary(outputStream *st, uintptr_t value);
+
 #endif // SHARE_UTILITIES_GLOBALDEFINITIONS_HPP

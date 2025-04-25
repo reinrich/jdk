@@ -434,3 +434,11 @@ bool IEEE_subnormal_handling_OK() {
   return (large_subnormal_double + small_subnormal_double > large_subnormal_double
           && -large_subnormal_double - small_subnormal_double < -large_subnormal_double);
 }
+
+void DDD_print_binary(outputStream *st, uintptr_t value) {
+    int bits = sizeof(uintptr_t) * 8;
+    for (int i = bits - 1; i >= 0; --i) {
+      st->put((value >> i) & 1 ? '1' : '0');
+      if (i % 8 == 0) st->put(' '); // Optional: space every byte
+    }
+}
