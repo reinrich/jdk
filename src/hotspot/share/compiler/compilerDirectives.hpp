@@ -71,6 +71,8 @@
   compilerdirectives_c1_other_flags(cflags) \
   compilerdirectives_c1_string_flags(cflags)
 
+// code: C->directive()->TraceDDDOption cmdline: -XX:CompileCommand=TraceDDD,*/*.rearrangeOp
+
 #ifdef COMPILER2
   #define compilerdirectives_c2_other_flags(cflags) \
     cflags(BlockLayoutByFrequency,  bool, BlockLayoutByFrequency,  BlockLayoutByFrequency) \
@@ -81,6 +83,7 @@ NOT_PRODUCT(cflags(TraceOptoOutput,     bool, TraceOptoOutput, TraceOptoOutput))
 NOT_PRODUCT(cflags(TraceEscapeAnalysis, bool, false, TraceEscapeAnalysis)) \
 NOT_PRODUCT(cflags(PrintIdeal,          bool, PrintIdeal, PrintIdeal)) \
     cflags(TraceSpilling,           bool, TraceSpilling, TraceSpilling) \
+    cflags(TraceDDD,                bool, false, TraceDDD)       \
     cflags(Vectorize,               bool, false, Vectorize) \
     cflags(CloneMapDebug,           bool, false, CloneMapDebug) \
 NOT_PRODUCT(cflags(IGVPrintLevel,       intx, PrintIdealGraphLevel, IGVPrintLevel)) \
