@@ -1811,22 +1811,12 @@ uint MachSpillCopyNode::implementation(C2_MacroAssembler *masm, PhaseRegAlloc *r
     else if (src_lo_rc == rc_vec && dst_lo_rc == rc_stack) {
       VectorSRegister Rsrc = as_VectorRegister(Matcher::_regEncode[src_lo]).to_vsr();
       int dst_offset = ra_->reg2offset(dst_lo);
+      assert(is_aligned(dst_offset, 16), "unaligned spill store with offset %d", dst_offset);
       if (PowerArchitecturePPC64 >= 9) {
-        if (is_aligned(dst_offset, 16)) {
-          if (masm) {
-            __ stxv(Rsrc, dst_offset, R1_SP); // matches storeV16_Power9
-          }
-          size += 4;
-        } else {
-          // Other alignment can be used by Vector API (VectorPayload in rearrangeOp,
-          // observed with VectorRearrangeTest.java on Power9).
-          if (masm) {
-            log_develop_trace(newcode)("unaligned vector spill slots (size:%d offset:%d)", size, dst_offset);
-            __ addi(R0, R1_SP, dst_offset);
-            __ stxvx(Rsrc, R0); // matches storeV16_Power9 (regarding element ordering)
-          }
-          size += 8;
+        if (masm) {
+          __ stxv(Rsrc, dst_offset, R1_SP); // matches storeV16_Power9
         }
+        size += 4;
       } else {
         if (masm) {
           __ addi(R0, R1_SP, dst_offset);
@@ -1845,20 +1835,12 @@ uint MachSpillCopyNode::implementation(C2_MacroAssembler *masm, PhaseRegAlloc *r
     else if (src_lo_rc == rc_stack && dst_lo_rc == rc_vec) {
       VectorSRegister Rdst = as_VectorRegister(Matcher::_regEncode[dst_lo]).to_vsr();
       int src_offset = ra_->reg2offset(src_lo);
+      assert(is_aligned(src_offset, 16), "unaligned spill load with offset %d", src_offset);
       if (PowerArchitecturePPC64 >= 9) {
-        if (is_aligned(src_offset, 16)) {
-          if (masm) {
-            __ lxv(Rdst, src_offset, R1_SP);
-          }
-          size += 4;
-        } else {
-          if (masm) {
-            log_develop_trace(newcode)("unaligned vector spill slots (size:%d offset:%d)", size, src_offset);
-            __ addi(R0, R1_SP, src_offset);
-            __ lxvx(Rdst, R0);
-          }
-          size += 8;
+        if (masm) {
+          __ lxv(Rdst, src_offset, R1_SP);
         }
+        size += 4;
       } else {
         if (masm) {
           __ addi(R0, R1_SP, src_offset);
