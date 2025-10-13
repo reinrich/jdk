@@ -338,10 +338,12 @@ inline void FreezeBase::patch_pd_unused(intptr_t* sp) {
 }
 
 inline intptr_t* AnchorMark::anchor_mark_set_pd() {
+  Unimplemented();
   return _top_frame.sp();
 }
 
 inline void AnchorMark::anchor_mark_clear_pd() {
+  Unimplemented();
 }
 
 //////// Thaw
