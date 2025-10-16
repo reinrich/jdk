@@ -338,12 +338,12 @@ inline void FreezeBase::patch_pd_unused(intptr_t* sp) {
 }
 
 inline intptr_t* AnchorMark::anchor_mark_set_pd() {
-  Unimplemented();
+  // Nothing to do on PPC because the interpreter does not use SP as expression stack pointer.
+  // Instead there is a dedicated register R15_esp which is not affected by VM calls.
   return _top_frame.sp();
 }
 
 inline void AnchorMark::anchor_mark_clear_pd() {
-  Unimplemented();
 }
 
 //////// Thaw
