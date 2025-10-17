@@ -72,9 +72,16 @@ void FreezeBase::adjust_interpreted_frame_unextended_sp(frame& f) {
 }
 
 inline void FreezeBase::prepare_freeze_interpreted_top_frame(frame& f) {
-  // nothing to do
-  DEBUG_ONLY( intptr_t* lspp = (intptr_t*) &(f.get_ijava_state()->top_frame_sp); )
-  assert(*lspp == f.unextended_sp() - f.fp(), "should be " INTPTR_FORMAT " usp:" INTPTR_FORMAT " fp:" INTPTR_FORMAT, *lspp, p2i(f.unextended_sp()), p2i(f.fp()));
+  // Nothing to do. We don't save a last sp since we cannot use sp as esp.
+  // Instead the top frame is trimmed when making an i2i call. The original
+  // top_frame_sp is set when the frame is pushed (see generate_fixed_frame()).
+  // An interpreter top frame that was just thawed is resized to top_frame_sp by the
+  // resume adapter (see generate_cont_resume_interpreter_adapter()). So the assertion is
+  // false, if we freeze again right after thawing as we do when redoing a vm call wasn't
+  // successful.
+  assert(_thread->interp_redoing_vm_call() ||
+         ((intptr_t*)f.at_relative(ijava_idx(top_frame_sp)) == f.unextended_sp()),
+         "top_frame_sp:" PTR_FORMAT " usp:" PTR_FORMAT, f.at_relative(ijava_idx(top_frame_sp)), p2i(f.unextended_sp()));
 }
 
 inline void FreezeBase::relativize_interpreted_frame_metadata(const frame& f, const frame& hf) {
