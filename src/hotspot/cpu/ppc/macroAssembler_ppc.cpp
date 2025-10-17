@@ -757,10 +757,11 @@ void MacroAssembler::clobber_nonvolatile_registers() {
       R31
   };
   Register bad = regs[0];
-  load_const_optimized(bad, 0xbad0101babe11111);
+  load_const_optimized(bad, 0xbad0101babe00000);
   for (uint32_t i = 1; i < (sizeof(regs) / sizeof(Register)); i++) {
-    mr(regs[i], bad);
+    addi(regs[i], regs[0], regs[i]->encoding());
   }
+  addi(regs[0], regs[0], regs[0]->encoding());
   BLOCK_COMMENT("} clobber nonvolatile registers");
 }
 #endif // ASSERT
