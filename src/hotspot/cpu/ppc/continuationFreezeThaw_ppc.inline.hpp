@@ -583,8 +583,16 @@ inline intptr_t* ThawBase::push_cleanup_continuation() {
 }
 
 inline intptr_t* ThawBase::push_preempt_adapter() {
-  Unimplemented();
-  return nullptr;
+  frame enterSpecial = new_entry_frame();
+  frame::common_abi* enterSpecial_abi = (frame::common_abi*)enterSpecial.sp();
+
+  enterSpecial_abi->lr = (intptr_t)StubRoutines::cont_preempt_stub();
+
+  log_develop_trace(continuations, preempt)("push_preempt_adapter enterSpecial sp: " INTPTR_FORMAT " adapter pc: " INTPTR_FORMAT,
+                                            p2i(enterSpecial_abi),
+                                            p2i(StubRoutines::cont_preempt_stub()));
+
+  return enterSpecial.sp();
 }
 
 inline void ThawBase::patch_pd(frame& f, const frame& caller) {
