@@ -56,7 +56,7 @@ class InterpreterMacroAssembler: public MacroAssembler {
   // R22 and R31 are preserved when a vthread gets preempted in the interpreter.
   // The interpreter already assumes that these registers are nonvolatile across native calls.
   bool nonvolatile_accross_vthread_preemtion(Register r) const {
-    return r->is_nonvolatile() && ((r == R22) || (r == R31));
+    return r->is_nonvolatile() && ((r == R24) || (r == R31));
   }
 
   // Base routine for all dispatches.

@@ -108,6 +108,8 @@ void InterpreterMacroAssembler::dispatch_prolog(TosState state, int bcp_incr) {
 // own dispatch. The dispatch address in R24_dispatch_addr is used for the
 // dispatch.
 void InterpreterMacroAssembler::dispatch_epilog(TosState state, int bcp_incr) {
+  assert(nonvolatile_accross_vthread_preemtion(R24_dispatch_addr),
+         "Requirement of field accesses (e.g. putstatic)");
   if (bcp_incr) { addi(R14_bcp, R14_bcp, bcp_incr); }
   mtctr(R24_dispatch_addr);
   bcctr(bcondAlways, 0, bhintbhBCCTRisNotPredictable);
@@ -2051,10 +2053,10 @@ void InterpreterMacroAssembler::call_VM_preemptable(Register oop_result, address
 #endif // ASSERT
 
   // Preserve 2 registers
-  assert(nonvolatile_accross_vthread_preemtion(R31) && nonvolatile_accross_vthread_preemtion(R22), "");
+  assert(nonvolatile_accross_vthread_preemtion(R31) && nonvolatile_accross_vthread_preemtion(R24), "");
   ld(R3_ARG1, _abi0(callers_sp), R1_SP); // load FP
   std(R31, _ijava_state_neg(lresult), R3_ARG1);
-  std(R22, _ijava_state_neg(fresult), R3_ARG1);
+  std(R24, _ijava_state_neg(fresult), R3_ARG1);
 
   // We set resume_pc as last java pc. It will be saved if the vthread gets preempted.
   // Later execution will continue right there.
@@ -2103,10 +2105,10 @@ void InterpreterMacroAssembler::restore_after_resume(Register fp) {
   mtctr(R31);
   bctrl();
   // Restore registers that are preserved across vthread preemption
-  assert(nonvolatile_accross_vthread_preemtion(R31) && nonvolatile_accross_vthread_preemtion(R22), "");
+  assert(nonvolatile_accross_vthread_preemtion(R31) && nonvolatile_accross_vthread_preemtion(R24), "");
   ld(R3_ARG1, _abi0(callers_sp), R1_SP); // load FP
   ld(R31, _ijava_state_neg(lresult), R3_ARG1);
-  ld(R22, _ijava_state_neg(fresult), R3_ARG1);
+  ld(R24, _ijava_state_neg(fresult), R3_ARG1);
 #ifdef ASSERT
   // Assert FP is in R11_scratch1 (see generate_cont_resume_interpreter_adapter())
   {

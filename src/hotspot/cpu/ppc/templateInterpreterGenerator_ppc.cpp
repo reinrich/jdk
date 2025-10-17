@@ -1249,7 +1249,7 @@ address TemplateInterpreterGenerator::generate_native_entry(bool synchronized) {
   const Register pending_exception    = R0;
   const Register result_handler_addr  = R31;
   const Register native_method_fd     = R12_scratch2; // preferred in MacroAssembler::branch_to
-  const Register access_flags         = R22_tmp2;
+  const Register access_flags         = R24_tmp4;
   const Register active_handles       = R11_scratch1; // R26_monitor saved to state.
   const Register sync_state           = R12_scratch2;
   const Register sync_state_addr      = sync_state;   // Address is dead after use.
