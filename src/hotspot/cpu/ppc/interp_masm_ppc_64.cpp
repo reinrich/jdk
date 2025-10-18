@@ -2104,11 +2104,6 @@ void InterpreterMacroAssembler::restore_after_resume(Register fp) {
   add_const_optimized(R31, R29_TOC, MacroAssembler::offset_to_global_toc(resume_adapter));
   mtctr(R31);
   bctrl();
-  // Restore registers that are preserved across vthread preemption
-  assert(nonvolatile_accross_vthread_preemtion(R31) && nonvolatile_accross_vthread_preemtion(R24), "");
-  ld(R3_ARG1, _abi0(callers_sp), R1_SP); // load FP
-  ld(R31, _ijava_state_neg(lresult), R3_ARG1);
-  ld(R24, _ijava_state_neg(fresult), R3_ARG1);
 #ifdef ASSERT
   // Assert FP is in R11_scratch1 (see generate_cont_resume_interpreter_adapter())
   {
