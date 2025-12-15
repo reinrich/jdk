@@ -1052,7 +1052,7 @@ void JavaThread::set_exception_oop(oop o) {
 }
 
 void JavaThread::handle_special_runtime_exit_condition() {
-  if (is_obj_deopt_suspend()) {
+  if (is_obj_deopt_suspend() && !in_critical()) {
     frame_anchor()->make_walkable();
     wait_for_object_deoptimization();
   }
