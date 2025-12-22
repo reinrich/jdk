@@ -105,7 +105,7 @@ class BytecodePrinter {
       // the incoming method.  We could lose a line of trace output.
       // This is acceptable in a debug-only feature.
       st->cr();
-      st->print("[%zu] ", Thread::current()->osthread()->thread_id_for_printing());
+      st->print("(JavaThread*)" PTR_FORMAT " [%zu] ", p2i(Thread::current()), Thread::current()->osthread()->thread_id_for_printing());
       method->print_name(st);
       st->cr();
     }
@@ -181,6 +181,9 @@ class BytecodePrinter {
 // in won't match, and this will print the method passed in again. Racing threads changing this global
 // will result in reprinting the method passed in again.
 static Method* _method_currently_being_printed = nullptr;
+
+Method* BytecodeTracer::_method = nullptr;
+Symbol* BytecodeTracer::_method_name = nullptr;
 
 void BytecodeTracer::trace_interpreter(const methodHandle& method, address bcp, uintptr_t tos, uintptr_t tos2, outputStream* st) {
   if (TraceBytecodes && BytecodeCounter::counter_value() >= TraceBytecodesAt) {

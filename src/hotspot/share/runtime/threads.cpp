@@ -44,6 +44,7 @@
 #include "gc/shared/oopStorage.hpp"
 #include "gc/shared/oopStorageSet.hpp"
 #include "gc/shared/stringdedup/stringDedup.hpp"
+#include "interpreter/bytecodeTracer.hpp"
 #include "jfr/jfrEvents.hpp"
 #include "jvm.h"
 #include "jvmtifiles/jvmtiEnv.hpp"
@@ -920,6 +921,12 @@ jint Threads::create_vm(JavaVMInitArgs* args, bool* canTryAgain) {
     LogStreamHandle(Info, perf, class, link) log;
     log.print_cr("At VM initialization completion:");
     ClassLoader::print_counters(&log);
+  }
+
+  if (TraceBytecodesOfMethod != nullptr) {
+    TraceBytecodes = true;
+    BytecodeTracer::set_method_name(SymbolTable::new_permanent_symbol(TraceBytecodesOfMethod));
+    log_develop_info(interpreter)("Tracing method %s", TraceBytecodesOfMethod);
   }
 
   return JNI_OK;

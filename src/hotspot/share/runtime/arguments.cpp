@@ -3703,7 +3703,12 @@ jint Arguments::parse(const JavaVMInitArgs* initial_cmd_args) {
 #endif
 
 #ifndef PRODUCT
-  if (TraceBytecodesAt != 0) {
+  if (TraceBytecodesAt != 0 || TraceBytecodes) {
+    TraceBytecodes = true;
+    CountBytecodes = true;
+  }
+  if (TraceBytecodesOfMethod != nullptr) {
+    // Don't enable CountBytecodes because the shared counter serializes too much
     TraceBytecodes = true;
   }
 #endif // PRODUCT
