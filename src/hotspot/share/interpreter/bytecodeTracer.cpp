@@ -109,7 +109,7 @@ class BytecodePrinter {
     // If the method changed (new method call, return to previous method after call finishes),
     // the signature needs to be re-printed for interpretability.
     if (method_changed) {
-      st->print("[%zu] ", Thread::current()->osthread()->thread_id_for_printing());
+      st->print("(JavaThread*)" PTR_FORMAT " [%zu] ", p2i(Thread::current()), Thread::current()->osthread()->thread_id_for_printing());
       method->print_name(st);
       st->cr();
     }
@@ -190,6 +190,11 @@ class BytecodePrinter {
 };
 
 #ifndef PRODUCT
+
+const Method* BytecodeTracerData::_method = nullptr;
+Symbol* BytecodeTracerData::_method_name = nullptr;
+Symbol* BytecodeTracerData::_class_name = nullptr;
+
 void BytecodeTracer::trace_interpreter(const methodHandle& method, intptr_t* fp, address bcp, uintptr_t tos, uintptr_t tos2, outputStream* st) {
   if (TraceBytecodes && BytecodeCounter::counter_value() >= TraceBytecodesAt) {
     BytecodeTracerData* data = JavaThread::current()->bytecode_tracer_data();

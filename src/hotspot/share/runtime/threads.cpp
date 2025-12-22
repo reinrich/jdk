@@ -44,6 +44,7 @@
 #include "gc/shared/oopStorage.hpp"
 #include "gc/shared/oopStorageSet.hpp"
 #include "gc/shared/stringdedup/stringDedup.hpp"
+#include "interpreter/bytecodeTracer.hpp"
 #include "jfr/jfrEvents.hpp"
 #include "jvm.h"
 #include "jvmtifiles/jvmtiEnv.hpp"
@@ -681,6 +682,16 @@ jint Threads::create_vm(JavaVMInitArgs* args, bool* canTryAgain) {
   // Launch -Xrun agents early if EagerXrunInit is set
   if (EagerXrunInit) {
     JvmtiAgentList::load_xrun_agents();
+  }
+
+  if (TraceBytecodesOfMethod != nullptr) {
+    TraceBytecodes = true;
+    BytecodeTracerData::set_method_name(SymbolTable::new_permanent_symbol(TraceBytecodesOfMethod));
+    log_develop_info(interpreter)("Tracing method %s", TraceBytecodesOfMethod);
+    if (TraceBytecodesOfCls != nullptr) {
+      BytecodeTracerData::set_class_name(SymbolTable::new_permanent_symbol(TraceBytecodesOfCls));
+      log_develop_info(interpreter)("of class %s", TraceBytecodesOfCls);
+    }
   }
 
   initialize_java_lang_classes(main_thread, CHECK_JNI_ERR);

@@ -28,11 +28,16 @@
 #include "interpreter/bytecodes.hpp"
 #include "memory/allStatic.hpp"
 #include "utilities/globalDefinitions.hpp"
+#include "utilities/sizes.hpp"
 
 class Method;
 class methodHandle;
 class outputStream;
 class BytecodeClosure;
+
+class Method;
+class Symbol;
+
 
 // The BytecodeTracer is a helper class used by the interpreter for run-time
 // bytecode tracing. If TraceBytecodes is turned on, trace_interpreter() will be called
@@ -51,6 +56,11 @@ class BytecodeTracerData {
   Method*         _current_method; // for method switches
   intptr_t*       _current_fp;     // for self-recursion
   bool            _is_wide;        // to parse the next bytecode properly
+
+  // Method from TraceBytecodesOfMethod
+  static const Method* _method;
+  static Symbol* _method_name;
+  static Symbol* _class_name;
 
  public:
   BytecodeTracerData() : _current_method(nullptr),
@@ -73,6 +83,13 @@ class BytecodeTracerData {
 
   bool            is_wide() const                        { return _is_wide; }
   void            set_wide(bool wide)                    { _is_wide = wide; }
+
+  static void   set_method_name(Symbol* name) { _method_name = name; }
+  static Symbol* get_method_name() { return _method_name; }
+  static void   set_class_name(Symbol* name) { _class_name = name; }
+  static Symbol* get_class_name() { return _class_name; }
+  static void set_method(const Method* m) { assert(_method == nullptr, ""); _method = m; }
+  static address method_addr() { return (address)&_method; }
 };
 
 #endif // SHARE_INTERPRETER_BYTECODETRACER_HPP

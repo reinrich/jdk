@@ -1569,6 +1569,12 @@ const int ObjectAlignmentInBytes = 8;
   develop(uintx, TraceBytecodesStopAt, 0,                                   \
           "Stop bytecode tracing at the specified bytecode number")         \
                                                                             \
+  develop(ccstr, TraceBytecodesOfMethod, nullptr,                           \
+          "-Xlog:interpreter=info -Xlog:class+load -Xlog:interpreter+bytecode=trace -XX:TraceBytecodesOfMethod=brkpt")        \
+                                                                            \
+  develop(ccstr, TraceBytecodesOfCls, nullptr,                              \
+          "Disambigouation of TraceBytecodesOfMethod")                      \
+                                                                            \
   /* Priorities */                                                          \
   product_pd(bool, UseThreadPriorities,  "Use native thread priorities")    \
                                                                             \

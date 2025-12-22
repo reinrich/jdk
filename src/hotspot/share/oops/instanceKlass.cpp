@@ -3999,6 +3999,28 @@ void InstanceKlass::print_class_load_logging(ClassLoaderData* loader_data,
 void InstanceKlass::print_class_load_helper(ClassLoaderData* loader_data,
                                              const ModuleEntry* module_entry,
                                              const ClassFileStream* cfs) const {
+  const Array<Method*>* const methods = this->methods();
+  const int num_methods = methods->length();
+
+  // go thru each method and check if it overrides a final method
+  for (int index = 0; index < num_methods; index++) {
+    const Method* const m = methods->at(index);
+
+    if (m->name() == BytecodeTracerData::get_method_name() &&
+        (BytecodeTracerData::get_class_name() == nullptr ||
+            BytecodeTracerData::get_class_name() == name())) {
+      ResourceMark rm;
+      log_develop_info(interpreter)("Loading tracing method %s", TraceBytecodesOfMethod);
+      log_develop_info(interpreter)("in class %s", name()->as_C_string());
+
+      LogTarget(Info, interpreter) _lt;
+      if (_lt.develop_is_enabled()) {
+        LogStream _ls(_lt);
+        _ls.print_cr("Loaded method to trace bytecodes: (Method*) " PTR_FORMAT, p2i(m));
+      }
+      BytecodeTracerData::set_method(m);
+    }
+  }
 
   if (!log_is_enabled(Info, class, load)) {
     return;
