@@ -28,6 +28,7 @@
 #include "compiler/disassembler.hpp"
 #include "gc/shared/barrierSetAssembler.hpp"
 #include "interpreter/bytecodeHistogram.hpp"
+#include "interpreter/bytecodeTracer.hpp"
 #include "interpreter/interp_masm.hpp"
 #include "interpreter/interpreter.hpp"
 #include "interpreter/interpreterRuntime.hpp"
@@ -1663,6 +1664,17 @@ address TemplateInterpreterGenerator::generate_trace_code(TosState state) {
 
   __ push(state);
   __ push(c_rarg0);
+
+  Label Lskip_vm_call;
+  if (TraceBytecodesOfMethod != nullptr) {
+    ExternalAddress method_addr(BytecodeTracer::method_addr());
+    Register method = rax;
+    Register tmp = c_rarg0;
+    __ get_method(method); // rcx holds method
+    __ cmpptr(method, method_addr, tmp);
+    __ jcc(Assembler::notEqual, Lskip_vm_call);
+  }
+
   __ push(c_rarg1);
   __ push(c_rarg2);
   __ push(c_rarg3);
@@ -1679,6 +1691,13 @@ address TemplateInterpreterGenerator::generate_trace_code(TosState state) {
   __ pop(c_rarg0);
   __ pop(state);
   __ ret(0);                                   // return from result handler
+
+  __ bind(Lskip_vm_call);
+  if (TraceBytecodesOfMethod != nullptr) {
+    __ pop(c_rarg0);
+    __ pop(state);
+    __ ret(0);                                   // return from result handler
+  }
 
   return entry;
 }

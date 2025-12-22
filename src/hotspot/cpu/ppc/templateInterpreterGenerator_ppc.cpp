@@ -28,6 +28,7 @@
 #include "compiler/disassembler.hpp"
 #include "gc/shared/barrierSetAssembler.hpp"
 #include "interpreter/bytecodeHistogram.hpp"
+#include "interpreter/bytecodeTracer.hpp"
 #include "interpreter/interpreter.hpp"
 #include "interpreter/interpreterRuntime.hpp"
 #include "interpreter/interp_masm.hpp"
@@ -2349,6 +2350,21 @@ address TemplateInterpreterGenerator::generate_trace_code(TosState state) {
   // Support short-cut for TraceBytecodesAt.
   // Don't call into the VM if we don't want to trace to speed up things.
   Label Lskip_vm_call;
+  Label Ldo_trace;
+
+  if (TraceBytecodesOfMethod != nullptr) {
+    int offs1 = __ load_const_optimized(R11_scratch1, BytecodeTracer::method_addr(), R0, true);
+    __ ld(R11_scratch1, offs1, R11_scratch1);
+    __ cmpd(CR0, R19_method, R11_scratch1);
+    if (TraceBytecodesAt > 0) {
+      __ beq(CR0, Ldo_trace);
+      // not equal: check conditions below
+    } else {
+      __ bne(CR0, Lskip_vm_call);
+      // equal: trace
+    }
+  }
+
   if (TraceBytecodesAt > 0) {
     int offs1 = __ load_const_optimized(R11_scratch1, (address) &TraceBytecodesAt, R0, true);
     int offs2 = __ load_const_optimized(R12_scratch2, (address) &BytecodeCounter::_counter_value, R0, true);
@@ -2358,6 +2374,7 @@ address TemplateInterpreterGenerator::generate_trace_code(TosState state) {
     __ blt(CR0, Lskip_vm_call);
   }
 
+  __ bind(Ldo_trace);
   __ push(state);
   // Load 2 topmost expression stack values.
   __ ld(R6_ARG4, tsize*Interpreter::stackElementSize, R15_esp);
@@ -2367,7 +2384,7 @@ address TemplateInterpreterGenerator::generate_trace_code(TosState state) {
   __ mtlr(R31);
   __ pop(state);
 
-  if (TraceBytecodesAt > 0) {
+  if ((TraceBytecodesOfMethod != nullptr) || (TraceBytecodesAt > 0)) {
     __ bind(Lskip_vm_call);
   }
   __ blr();

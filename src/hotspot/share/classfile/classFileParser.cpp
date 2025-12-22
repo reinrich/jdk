@@ -38,6 +38,7 @@
 #include "classfile/verifier.hpp"
 #include "classfile/vmClasses.hpp"
 #include "classfile/vmSymbols.hpp"
+#include "interpreter/bytecodeTracer.hpp"
 #include "jvm.h"
 #include "logging/log.hpp"
 #include "logging/logStream.hpp"
@@ -2754,6 +2755,17 @@ void ClassFileParser::parse_methods(const ClassFileStream* const cfs,
         *declares_nonstatic_concrete_methods = true;
       }
       _methods->at_put(index, method);
+
+      if (method->name() == BytecodeTracer::get_method_name()) {
+        log_develop_info(interpreter)("Tracing method %s", TraceBytecodesOfMethod);
+        LogTarget(Info, interpreter) _lt;
+        if (_lt.develop_is_enabled()) {
+          ResourceMark rm(THREAD);
+          LogStream _ls(_lt);
+          _ls.print_cr("Loaded method to trace bytecodes: (Method*) " PTR_FORMAT, p2i(method));
+        }
+        BytecodeTracer::set_method(method);
+      }
     }
 
     if (_need_verify && length > 1) {

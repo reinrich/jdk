@@ -27,6 +27,7 @@
 
 #include "memory/allStatic.hpp"
 #include "utilities/globalDefinitions.hpp"
+#include "utilities/sizes.hpp"
 
 // The BytecodeTracer is a helper class used by the interpreter for run-time
 // bytecode tracing. If TraceBytecodes turned on, trace_interpreter() will be called
@@ -36,10 +37,23 @@ class methodHandle;
 class outputStream;
 
 class BytecodeClosure;
+
+class Method;
+class Symbol;
+
 class BytecodeTracer: AllStatic {
+
+    static Method* _method;
+    static Symbol* _method_name;
+
  public:
   NOT_PRODUCT(static void trace_interpreter(const methodHandle& method, address bcp, uintptr_t tos, uintptr_t tos2, outputStream* st = tty);)
   static void print_method_codes(const methodHandle& method, int from, int to, outputStream* st, int flags);
+
+  static address method_addr() { return (address)&_method; }
+  static void   set_method_name(Symbol* name) { _method_name = name; }
+  static Symbol* get_method_name() { return _method_name; }
+  static void set_method(Method* m) { _method = m; }
 };
 
 #endif // SHARE_INTERPRETER_BYTECODETRACER_HPP

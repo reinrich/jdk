@@ -1583,6 +1583,8 @@ const int ObjectAlignmentInBytes = 8;
   develop(uintx, TraceBytecodesStopAt, 0,                                   \
           "Stop bytecode tracing at the specified bytecode number")         \
                                                                             \
+  develop(ccstr, TraceBytecodesOfMethod, nullptr,                           \
+          "")        \
   /* Priorities */                                                          \
   product_pd(bool, UseThreadPriorities,  "Use native thread priorities")    \
                                                                             \
