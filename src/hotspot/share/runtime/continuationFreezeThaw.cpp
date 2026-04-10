@@ -2594,9 +2594,9 @@ inline void ThawBase::patch(frame& f, const frame& caller, bool bottom) {
   if (bottom) {
     ContinuationHelper::Frame::patch_pc(caller, _cont.is_empty() ? caller.pc()
                                                                  : StubRoutines::cont_returnBarrier());
-  } else if (_caller_deoptimized_on_thaw) {
+  } else if (_caller_deoptimized_on_thaw || caller.is_interpreted_frame()) {
     // caller was deoptimized during thaw but we've overwritten the return address when copying f from the heap.
-    assert(caller.is_deoptimized_frame(), "");
+    assert(caller.is_deoptimized_frame() || caller.is_interpreted_frame(), "");
     ContinuationHelper::Frame::patch_pc(caller, caller.raw_pc());
     _caller_deoptimized_on_thaw = false;
   }
