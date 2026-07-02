@@ -3381,6 +3381,10 @@ void PhaseOutput::dump_asm_on(outputStream* st, int* pcs, uint pc_limit) {
         starts_bundle = ' ';
         st->fill_to(prefix_len);
         n->format(C->regalloc(), st);
+        if (Verbose) {
+          st->fill_to(60);
+          st->print("\t\t ::= %s", n->Name());
+        }
         st->cr();
       }
 
