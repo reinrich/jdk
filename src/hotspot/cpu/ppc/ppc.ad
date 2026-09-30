@@ -3636,7 +3636,7 @@ operand immIhi16() %{
 
 // Integer Immediate: 32-bit immediate for prefixed addi and load/store.
 operand immI32() %{
-  predicate(PowerArchitecturePPC64 >= 10);
+  predicate(PowerArchitecturePPC64 >= 10 && !UseNewCode);
   op_cost(0);
   match(ConI);
   format %{ %}
@@ -5465,7 +5465,6 @@ instruct loadConI32(iRegIdst dst, immI32 src) %{
   match(Set dst src);
   // This macro is valid only in Power 10 and up, but adding the following predicate here
   // caused a build error, so we comment it out for now.
-  // predicate(PowerArchitecturePPC64 >= 10);
   ins_cost(DEFAULT_COST+1);
 
   format %{ "PLI     $dst, $src" %}
