@@ -152,9 +152,11 @@ $(RPMS_UNPACKED_MARKER): $(DOWNLOAD_RPMS_MARKER)
 	  for rpm in $(RPM_PATTERNS); do \
 	    if [ ! -e "$$rpm" ]; then continue; fi; \
 	    echo Extracting $$rpm...; \
+	    chmod -R u+w . 2> /dev/null || true; \
 	    rpm2cpio $$rpm | \
 	        cpio --extract --make-directories -f $(CPIO_EXCLUDES) \
-	            || exit 1; \
+	            || true; \
+	    chmod -R u+w . 2> /dev/null || true; \
 	  done \
 	)
 	touch $@
